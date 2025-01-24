@@ -3,5 +3,12 @@
 version = 3
 
 [[package]]
-name = "http-from-scratch"
+name = "http_from_scratch"
 version = "0.1.0"
+
+[[package]]
+name = "main"
+version = "0.1.0"
+dependencies = [
+ "http_from_scratch",
+]

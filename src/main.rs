@@ -1,13 +1,13 @@
-mod common;
-mod request;
-mod response;
+extern crate http_from_scratch;
+
+use http_from_scratch::{
+    request::Request,
+    response::{Response, Status},
+};
 
 use std::collections::HashMap;
 use std::io::Write;
 use std::net::{TcpListener, TcpStream};
-
-use request::Request;
-use response::{Response, Status};
 
 fn handle_connection(mut stream: TcpStream) {
     let req = Request::from_reader(&mut stream);
