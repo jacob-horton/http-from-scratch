@@ -1,16 +1,15 @@
-use std::collections::HashMap;
 use std::io::{BufRead, Read};
 use std::str::FromStr;
 use std::{io::BufReader, net::TcpStream};
 
-use crate::common::Method;
+use crate::common::{Header, Method};
 
 #[derive(Debug, Clone)]
 pub struct Request {
     pub method: Method,
     pub path: String,
     pub version: String,
-    pub headers: HashMap<String, String>,
+    pub headers: Vec<Header>,
     pub body: Option<String>,
 }
 
@@ -31,21 +30,24 @@ impl Request {
         buf.clear();
         buf_read.read_line(&mut buf).unwrap();
 
-        let mut headers = HashMap::new();
+        let mut headers = Vec::new();
         while !buf.trim().is_empty() {
-            let (key, value) = buf.split_once(":").unwrap();
-            headers.insert(
-                key.trim().to_owned().to_lowercase(),
-                value.trim().to_owned(),
-            );
+            let (name, value) = buf.split_once(":").unwrap();
+            headers.push(Header {
+                name: name.trim().to_owned(),
+                value: value.trim().to_owned(),
+            });
 
             buf.clear();
             buf_read.read_line(&mut buf).unwrap();
         }
 
         let mut body = None;
-        if let Some(length) = headers.get("content-length") {
-            let length: usize = length.parse().unwrap();
+        if let Some(length) = headers
+            .iter()
+            .find(|h| h.name.to_lowercase() == "content-length")
+        {
+            let length: usize = length.value.parse().unwrap();
 
             if length > 0 {
                 let mut buf = vec![0; length];

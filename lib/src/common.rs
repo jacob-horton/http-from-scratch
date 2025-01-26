@@ -17,3 +17,9 @@ impl FromStr for Method {
         }
     }
 }
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Header {
+    pub name: String,
+    pub value: String,
+}

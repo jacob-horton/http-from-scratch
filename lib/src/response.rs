@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use crate::common::Header;
 
 #[derive(Debug, Clone)]
 pub enum Status {
@@ -151,7 +151,7 @@ impl ToString for Status {
 pub struct Response {
     pub version: String,
     pub status_code: Status,
-    pub headers: HashMap<String, String>,
+    pub headers: Vec<Header>,
     pub body: Option<String>,
 }
 
@@ -163,15 +163,15 @@ impl ToString for Response {
         result.push_str(&self.status_code.to_string());
         result.push_str("\r\n");
 
-        for (k, v) in &self.headers {
+        for header in &self.headers {
             // This is calculatd and added later
-            if k.to_lowercase() == "content-length" {
+            if header.name.to_lowercase() == "content-length" {
                 continue;
             }
 
-            result.push_str(&k.to_string());
+            result.push_str(&header.name.to_string());
             result.push_str(": ");
-            result.push_str(&v.to_string());
+            result.push_str(&header.value.to_string());
             result.push_str("\r\n");
         }
 
