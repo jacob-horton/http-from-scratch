@@ -4,6 +4,9 @@ use std::str::FromStr;
 pub enum Method {
     Get,
     Post,
+    Delete,
+    Put,
+    Options,
 }
 
 impl FromStr for Method {
@@ -13,6 +16,9 @@ impl FromStr for Method {
         match input {
             "GET" => Ok(Method::Get),
             "POST" => Ok(Method::Post),
+            "DELETE" => Ok(Method::Delete),
+            "PUT" => Ok(Method::Put),
+            "OPTIONS" => Ok(Method::Options),
             _ => Err(()),
         }
     }
