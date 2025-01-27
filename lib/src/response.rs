@@ -155,6 +155,64 @@ pub struct Response {
     pub body: Option<String>,
 }
 
+impl Response {
+    pub fn new(status_code: Status) -> Self {
+        Self {
+            status_code,
+            version: "HTTP/1.1".to_string(),
+            headers: Vec::new(),
+            body: None,
+        }
+    }
+
+    pub fn with_cors(mut self, origin: String) -> Self {
+        self.headers.push(Header {
+            name: "Access-Control-Allow-Origin".to_string(),
+            value: origin,
+        });
+
+        self.headers.push(Header {
+            name: "Access-Control-Allow-Credentials".to_string(),
+            value: "true".to_string(),
+        });
+
+        self
+    }
+
+    pub fn with_header(mut self, name: String, value: String) -> Self {
+        self.headers.push(Header { name, value });
+
+        self
+    }
+
+    pub fn with_cookie(
+        mut self,
+        name: String,
+        value: String,
+        max_age: u64,
+        http_only: bool,
+    ) -> Self {
+        self.headers.push(Header {
+            name: "Set-Cookie".to_string(),
+            value: format!(
+                "{}={}; Max-Age={}{}",
+                name,
+                value,
+                max_age,
+                if http_only { "; HttpOnly" } else { "" },
+            ),
+        });
+
+        self
+    }
+
+    pub fn with_body(mut self, body: String) -> Self {
+        self.body = Some(body);
+
+        self
+    }
+}
+
 impl ToString for Response {
     fn to_string(&self) -> String {
         let mut result = String::new();
