@@ -165,10 +165,10 @@ impl Response {
         }
     }
 
-    pub fn with_cors(mut self, origin: String) -> Self {
+    pub fn with_cors(mut self, origin: &str) -> Self {
         self.headers.push(Header {
             name: "Access-Control-Allow-Origin".to_string(),
-            value: origin,
+            value: origin.to_string(),
         });
 
         self.headers.push(Header {
@@ -179,19 +179,16 @@ impl Response {
         self
     }
 
-    pub fn with_header(mut self, name: String, value: String) -> Self {
-        self.headers.push(Header { name, value });
+    pub fn with_header(mut self, name: &str, value: &str) -> Self {
+        self.headers.push(Header {
+            name: name.to_string(),
+            value: value.to_string(),
+        });
 
         self
     }
 
-    pub fn with_cookie(
-        mut self,
-        name: String,
-        value: String,
-        max_age: u64,
-        http_only: bool,
-    ) -> Self {
+    pub fn with_cookie(mut self, name: &str, value: &str, max_age: u64, http_only: bool) -> Self {
         self.headers.push(Header {
             name: "Set-Cookie".to_string(),
             value: format!(
@@ -206,8 +203,8 @@ impl Response {
         self
     }
 
-    pub fn with_body(mut self, body: String) -> Self {
-        self.body = Some(body);
+    pub fn with_body(mut self, body: &str) -> Self {
+        self.body = Some(body.to_string());
 
         self
     }
