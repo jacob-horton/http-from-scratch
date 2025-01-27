@@ -5,21 +5,16 @@ use http_from_scratch::{
     response::{Response, Status},
 };
 
-use std::collections::HashMap;
 use std::io::Write;
 use std::net::{TcpListener, TcpStream};
 
 fn handle_connection(mut stream: TcpStream) {
     let req = Request::from_reader(&mut stream);
 
-    println!("{req:#?}");
-
-    let resp = Response {
-        version: "HTTP/1.1".to_string(),
-        status_code: Status::Ok,
-        headers: HashMap::new(),
-        body: req.body,
-    };
+    let mut resp = Response::new(Status::Ok);
+    if let Some(body) = req.body {
+        resp = resp.with_body(&body);
+    }
 
     println!("{}", resp.to_string());
 
