@@ -4,6 +4,12 @@ use std::{io::BufReader, net::TcpStream};
 
 use crate::common::{Header, Method};
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct Cookie {
+    pub name: String,
+    pub value: String,
+}
+
 #[derive(Debug, Clone)]
 pub struct Request {
     pub method: Method,
@@ -11,6 +17,7 @@ pub struct Request {
     pub version: String,
     pub headers: Vec<Header>,
     pub body: Option<String>,
+    pub cookies: Vec<Cookie>,
 }
 
 impl Request {
@@ -42,6 +49,7 @@ impl Request {
             buf_read.read_line(&mut buf).unwrap();
         }
 
+        // Read body if there is one
         let mut body = None;
         if let Some(length) = headers
             .iter()
@@ -58,12 +66,35 @@ impl Request {
             }
         }
 
+        // Read cookies from headers, also leave cookies in headers
+        let mut cookies = Vec::new();
+        for header in &headers {
+            if header.name.to_lowercase() == "cookie" {
+                for cookie in header.value.split(";") {
+                    let (name, value) = cookie.split_once("=").expect("Invalid cookie");
+                    cookies.push(Cookie {
+                        name: name.trim().to_string(),
+                        value: value.trim().to_string(),
+                    })
+                }
+            }
+        }
+
         return Request {
             body,
             headers,
             path,
             method,
             version,
+            cookies,
         };
+    }
+
+    pub fn get_cookie(&self, name: &str) -> Option<String> {
+        return self
+            .cookies
+            .iter()
+            .find(|c| c.name == name)
+            .map(|c| c.value.clone());
     }
 }
