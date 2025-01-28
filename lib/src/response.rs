@@ -219,7 +219,7 @@ impl ToString for Response {
         result.push_str("\r\n");
 
         for header in &self.headers {
-            // This is calculatd and added later
+            // This is calculated and added later
             if header.name.to_lowercase() == "content-length" {
                 continue;
             }
@@ -231,13 +231,13 @@ impl ToString for Response {
         }
 
         if let Some(body) = &self.body {
-            result.push_str("Content-Lenth: ");
+            result.push_str("Content-Length: ");
             result.push_str(&body.len().to_string());
 
             result.push_str("\r\n\r\n");
             result.push_str(body);
         } else {
-            result.push_str("Content-Lenth: 0");
+            result.push_str("Content-Length: 0");
         }
 
         return result;
