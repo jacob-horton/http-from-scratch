@@ -3,16 +3,20 @@ use std::collections::BTreeMap;
 use crate::{common::Method, request::Request, response::Response};
 
 pub type Params = BTreeMap<String, String>;
-pub type Handler<T> = fn(req: Request, params: &Params, state: T) -> Response;
+pub type Handler<T> = fn(req: Request, params: &Params, state: &T) -> Response;
 
 #[derive(Clone, Debug)]
 pub struct Router<T> {
     routes: Vec<Route<T>>,
+    state: T,
 }
 
 impl<T> Router<T> {
-    pub fn new() -> Self {
-        Self { routes: Vec::new() }
+    pub fn new(state: T) -> Self {
+        Self {
+            routes: Vec::new(),
+            state,
+        }
     }
 
     pub fn add(&mut self, method: Method, path_pattern: &str, handler: Handler<T>) {
@@ -23,19 +27,19 @@ impl<T> Router<T> {
         });
     }
 
-    pub fn recognise(&self, method: &Method, path: &str) -> Option<RouteMatch<T>> {
-        let handler = self.routes.iter().find_map(|r| {
-            if r.method != *method {
+    pub fn handle(&self, req: Request) -> Option<Response> {
+        let route = self.routes.iter().find_map(|r| {
+            if r.method != req.method {
                 return None;
             }
 
-            return r.path_pattern.matches(path).map(|params| RouteMatch {
+            return r.path_pattern.matches(&req.path).map(|params| RouteMatch {
                 handler: r.handler,
                 params,
             });
         });
 
-        handler
+        route.map(|route| (route.handler)(req, &route.params, &self.state))
     }
 }
 

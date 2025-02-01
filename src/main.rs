@@ -31,22 +31,16 @@ fn main() {
 
     // Set up state and router
     let request_counter: RwLock<usize> = RwLock::new(0);
-    let mut router = Router::<&RwLock<usize>>::new();
+    let mut router = Router::<RwLock<usize>>::new(request_counter);
     router.add(Method::Post, "/echo", handle_echo);
 
     for stream in listener.incoming() {
         let mut stream = stream.unwrap();
 
-        // Read request and find route
         let req = Request::from_reader(&mut stream);
-        let route = router.recognise(&req.method, &req.path);
-
-        let resp = match route {
-            // If route found, call its handler with the request, params, and state
-            Some(r) => (r.handler)(req, &r.params, &request_counter),
-            // If route not found, return 404
-            None => Response::new(Status::NotFound),
-        };
+        let resp = router
+            .handle(req)
+            .unwrap_or(Response::new(Status::NotFound));
 
         stream.write_all(resp.to_string().as_bytes()).unwrap();
     }
